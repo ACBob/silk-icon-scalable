@@ -5,12 +5,11 @@
 The classic silk icon set recreated (& extended) as SVG
 
 ## [Preview, and comparison with the original](https://frhun.de/silk-icon-scalable/preview/)
-
+*Note: The original vectorizations were made by [frhun](https://github.com/frhun), this repository mostly rewrites the generate script to work on my machine.*
 
 ## Generating from sources:
 
-Inkscape and Pyhton 3 are assumed to be installed,
-and present in the `$PATH`.
+Python 3 are assumed to be installed, and present in the `$PATH`.
 Generating the combined icons in ./generate:
 
 ```sh
@@ -25,7 +24,7 @@ npm -g install svgo
 yarn global add svgo
 
 # generate the overlay variants in ./generate
-python combine
+python nucombine.py
 
 # generate the preview page
 python preview/genindex.py
