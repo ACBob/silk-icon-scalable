@@ -1,10 +1,10 @@
 %YAML 1.2
 ---
 export-mappings:
-- type: hardlink
+- type: copy
   glob: ./baseicons/*
   outputpath: ./
-- type: hardlink
+- type: copy
   glob: ./extra/*
   outputpath: ./extra/
 - type: overlays

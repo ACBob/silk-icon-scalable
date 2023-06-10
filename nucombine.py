@@ -4,6 +4,7 @@ import yaml
 import os
 import svgutils.transform as svgtransform
 import glob
+import shutil
 
 import pathlib
 
@@ -14,6 +15,29 @@ def ensure_exist(path: str) -> None:
     pathlib.Path(path).mkdir(parents=True, exist_ok=True)
 
 
+HAS_SVGO = shutil.which("svgo") is not None
+
+
+def svgo_optimize(inpath: str, outpath: str = ""):
+    # can't do anything w/out svgo...
+    if not HAS_SVGO:
+        return
+
+    import subprocess as sp
+    import sys
+
+    if os.path.isfile(inpath) and (
+        outpath == "" or os.path.isdir(os.path.dirname(outpath))
+    ):
+        args = ["svgo", inpath]
+        if outpath != "":
+            args.append(["-o", outpath])
+        sp.run(args)
+    else:
+        print("A non existing file path was passed to svgoTreat().", file=sys.stderr)
+        exit(2)
+
+
 if __name__ == "__main__":
     ensure_exist(EXPORT_PATH)
 
@@ -21,11 +45,14 @@ if __name__ == "__main__":
 
     root = os.getcwd()
 
+    if not HAS_SVGO:
+        print("SVGO not detected! SVG optimisation disabled.")
+
     for mapping in manifest["export-mappings"]:
         outroot = os.path.join(root, EXPORT_PATH, mapping["outputpath"])
         ensure_exist(outroot)
 
-        if mapping["type"] == "hardlink":
+        if mapping["type"] == "copy":
             inpath = os.path.join(root, mapping["glob"])
             inglob = glob.glob(inpath)
 
@@ -36,7 +63,8 @@ if __name__ == "__main__":
                 )
 
                 if not os.path.exists(outpath):
-                    os.link(file, outpath)
+                    shutil.copyfile(file, outpath)
+                    svgo_optimize(outpath)
 
         elif mapping["type"] == "overlays":
             base_path = mapping.get("basepath", "./")
@@ -67,3 +95,5 @@ if __name__ == "__main__":
                     overlaysvg = svgtransform.fromfile(overlay_path)
                     overlaid.append(overlaysvg)
                     overlaid.save(outpath)
+
+                    svgo_optimize(outpath)
